@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --ml-primary: #7c3aed;
+  --ml-secondary: #1e1b4b;
+  --ml-accent: #f59e0b;
+  --ml-dark: #0f0a1a;
+  --ml-card: #1a1430;
+  --ml-text: #e2e8f0;
+  --ml-text-light: #94a3b8;
+  --ml-danger: #ef4444;
+  --ml-success: #22c55e;
+  --font-gaming: 'Orbitron', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: linear-gradient(180deg, var(--ml-secondary) 0%, var(--ml-dark) 100%);
+  color: var(--ml-text);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-gaming);
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: var(--ml-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--ml-accent);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--ml-primary);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.35);
+}
+
+.btn-accent {
+  background: var(--ml-accent);
+  color: #111;
+}
+
+.btn-danger {
+  background: var(--ml-danger);
+  color: #fff;
+}
+
+.card {
+  background: linear-gradient(145deg, var(--ml-card), #2a1f45);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.5rem;
+  background: rgba(15, 10, 26, 0.6);
+  color: var(--ml-text);
+}
+
+.input:focus {
+  outline: 2px solid var(--ml-accent);
+  border-color: transparent;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.table th {
+  color: var(--ml-accent);
+  font-family: var(--font-gaming);
+  font-size: 0.85rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-admin { background: rgba(124, 58, 237, 0.25); color: #c4b5fd; }
+.badge-cajero { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+
+.layout-public { min-height: 100vh; display: flex; flex-direction: column; }
+.layout-admin { min-height: 100vh; display: grid; grid-template-columns: 240px 1fr; }
+
+.sidebar {
+  background: rgba(15, 10, 26, 0.95);
+  border-right: 1px solid rgba(124, 58, 237, 0.2);
+  padding: 1.5rem 1rem;
+}
+
+.sidebar a {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--ml-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.sidebar a.active,
+.sidebar a:hover {
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--ml-text);
+}
+
+.main-content { padding: 1.5rem; }
+
+.text-muted { color: var(--ml-text-light); }
+.text-accent { color: var(--ml-accent); }
+.glow { text-shadow: 0 0 12px rgba(124, 58, 237, 0.6); }

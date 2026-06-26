@@ -1,0 +1,17 @@
+# ============================================================================
+#  ARCHIVO: .gitignore
+#  UBICACIÓN: backend/.gitignore
+#  PROPÓSITO: Archivos y carpetas que NO deben subirse a git
+# ============================================================================
+
+node_modules/
+.env
+.env.local
+.env.production
+uploads/productos/
+uploads/comprobantes/
+backups/
+logs/
+dist/
+*.log
+.DS_Store

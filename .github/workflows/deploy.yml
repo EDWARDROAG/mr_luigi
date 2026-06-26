@@ -1,0 +1,42 @@
+name: Deploy Mr. Luigi
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend (production)
+        working-directory: frontend
+        run: npm run build:prod
+        env:
+          # Ajustar secrets en el repositorio GitHub
+          VITE_API_URL: ${{ secrets.MR_LUIGI_API_URL }}
+
+      - name: Install backend
+        working-directory: backend
+        run: npm ci --omit=dev
+
+      # Personalizar según hosting privado (SSH, FTP, webhook, etc.)
+      - name: Deploy placeholder
+        run: |
+          echo "Configurar paso de despliegue al hosting privado"
+          echo "Artefactos: frontend/dist/frontend/browser y backend/"

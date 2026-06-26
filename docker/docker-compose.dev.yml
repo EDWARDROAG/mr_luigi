@@ -1,0 +1,74 @@
+# Mr. Luigi - Entorno Docker/LAN (PostgreSQL + API + Frontend)
+# Uso: docker compose -f docker/docker-compose.dev.yml up -d --build
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mr-luigi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mr_luigi_db
+      POSTGRES_USER: mr_luigi_user
+      POSTGRES_PASSWORD: mr_luigi_docker_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - mr_luigi_postgres_data:/var/lib/postgresql/data
+      - ../database/init-mr-luigi-postgres.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mr_luigi_user -d mr_luigi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - mr-luigi-net
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: mr-luigi-api
+    restart: unless-stopped
+    environment:
+      PORT: 3007
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:5507
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mr_luigi_db
+      DB_USER: mr_luigi_user
+      DB_PASSWORD: mr_luigi_docker_pass
+      JWT_SECRET: docker_jwt_secret_change_in_prod
+      ADMIN_EMAIL: admin@mrluigi.local
+      ADMIN_PASSWORD: MrLuigi2026Admin
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../backend/uploads:/app/uploads
+    networks:
+      - mr-luigi-net
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../docker/Dockerfile.frontend
+      args:
+        BUILD_CONFIG: docker
+    container_name: mr-luigi-web
+    restart: unless-stopped
+    ports:
+      - "5507:80"
+    depends_on:
+      - backend
+    networks:
+      - mr-luigi-net
+
+volumes:
+  mr_luigi_postgres_data:
+
+networks:
+  mr-luigi-net:
+    driver: bridge
