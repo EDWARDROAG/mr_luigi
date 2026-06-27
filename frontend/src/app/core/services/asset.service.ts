@@ -1,10 +1,15 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { APP_BASE_HREF } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class AssetService {
+  private readonly baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
+
+  /** Ruta pública respetando base href (local `/`, GitHub Pages `/mr_luigi/`). */
   assetUrl(path: string): string {
-    const normalized = path.startsWith('/') ? path.slice(1) : path;
-    return `/${normalized}`;
+    const normalized = path.replace(/^\//, '');
+    const base = this.baseHref.endsWith('/') ? this.baseHref : `${this.baseHref}/`;
+    return `${base}${normalized}`;
   }
 
   applyCssVars(): void {
@@ -18,7 +23,7 @@ export class AssetService {
       '--asset-pattern-yellow-dots': 'assets/img/pattern-yellow-dots.png',
     };
     for (const [name, path] of Object.entries(assets)) {
-      root.style.setProperty(name, `url(${this.assetUrl(path)})`);
+      root.style.setProperty(name, `url('${this.assetUrl(path)}')`);
     }
   }
 }

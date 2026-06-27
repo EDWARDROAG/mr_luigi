@@ -12,7 +12,7 @@ import { AssetService } from '../../core/services/asset.service';
     <div class="layout-public">
       <header class="header">
         <a routerLink="/" class="brand">
-          <img src="assets/img/logo.png" alt="Mr. Luigi" class="logo" onerror="this.style.display='none'" />
+          <img [src]="logoUrl" alt="Mr. Luigi" class="logo" />
           <span class="glow">{{ appName }}</span>
         </a>
         <nav class="nav">
@@ -54,6 +54,7 @@ export class PublicLayoutComponent implements OnInit {
   readonly year = new Date().getFullYear();
   readonly whatsappLink = `https://wa.me/${environment.whatsappPhone}`;
   private readonly assets = inject(AssetService);
+  readonly logoUrl = this.assets.assetUrl('assets/img/logo.png');
 
   ngOnInit(): void {
     this.assets.applyCssVars();
