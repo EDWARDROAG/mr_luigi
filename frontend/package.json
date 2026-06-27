@@ -11,6 +11,7 @@
     "build:local": "ng build --configuration local",
     "build:docker": "ng build --configuration docker",
     "build:prod": "ng build --configuration production",
+    "build:github": "ng build --configuration github",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

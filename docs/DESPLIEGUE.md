@@ -6,7 +6,7 @@
 |---------|---------|----------|----------------|
 | **Local** | `localhost:3007` | `localhost:5507` | `environment.local.ts` |
 | **Docker/LAN** | contenedor `:3007` | nginx `:5507` | `environment.docker.ts` |
-| **Producción** | hosting API | hosting estático | `environment.prod.ts` |
+| **Producción** | hosting API | https://edwardroag.github.io/mr_luigi/ | `environment.prod.ts` / `environment.github.ts` |
 
 ## Local
 
@@ -50,6 +50,16 @@ DB_HOST=...
 JWT_SECRET=...
 ```
 
-## GitHub Actions
+## GitHub Actions / GitHub Pages
 
-Plantilla en `.github/workflows/deploy.yml` — ajustar secrets y rutas del hosting privado.
+Tras cada push a `main`, el workflow publica el **frontend** en GitHub Pages.
+
+**URL del sitio:** https://edwardroag.github.io/mr_luigi/
+
+### Activar Pages (una sola vez)
+
+1. Repo GitHub → **Settings** → **Pages**
+2. **Build and deployment** → Source: **GitHub Actions**
+3. Hacer push a `main` y revisar la pestaña **Actions** → job `deploy` → ver el enlace en el summary
+
+> GitHub Pages solo sirve el frontend estático. El backend (API en puerto 3007) debe desplegarse en tu hosting privado por separado.
