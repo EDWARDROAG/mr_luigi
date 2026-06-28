@@ -57,10 +57,15 @@ La **cabecera del script** incluye la guía completa (formato especificación de
 
 ---
 
-## Pañalera Grace (este repo)
+## Pañalera Grace (referencia)
 
-- Vitrina: `frontend-public/`
-- URL Pages: https://edwardroag.github.io/PA-ALERA_GRACE/
+Script portable usado también en otros proyectos. Ver cabecera de `detect-and-deploy.js`.
+
+## Mr. Luigi (este repo)
+
+- Vitrina: `frontend/dist/frontend/browser/` (build Angular)
+- Assets fuente: `frontend/public/assets/`
+- URL Pages: https://edwardroag.github.io/mr_luigi/
 - Doc detallada: [docs/DEPLOY-VITRINA.md](../../docs/DEPLOY-VITRINA.md)
 
 ---

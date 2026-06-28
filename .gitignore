@@ -14,3 +14,19 @@ Thumbs.db
 .idea/
 .vscode/
 !frontend/.vscode/
+# --- Código privado (solo local, no subir a GitHub) ---
+database
+docker
+docs/INSTALACION.md
+docs/DESPLIEGUE.md
+docs/CONTEXTO_MIGRACION.md
+docs/TRAZABILIDAD.md
+docs/AGENTE_MIGRACION.md
+docs/ROLES.md
+historial-usuario.md
+scripts/docker-rebuild.ps1
+scripts/build-prod.ps1
+scripts/sync-assets.ps1
+.env.postgres.local.example
+package.json
+package-lock.json

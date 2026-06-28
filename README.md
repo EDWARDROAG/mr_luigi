@@ -1,74 +1,61 @@
-# Mr. Luigi
+# Mr. Luigi — Vitrina pública
 
-Tienda gaming **Mr. Luigi** — migración desde Luigi's Gaming con arquitectura backend de CoreX.
+Tienda gaming **Mr. Luigi** — sitio público (vitrina Angular).
 
-## Stack
+**Sitio en vivo:** https://edwardroag.github.io/mr_luigi/
 
-- **Frontend:** Angular 19 (puerto 5507)
-- **Backend:** Node.js + Express (puerto 3007)
-- **Base de datos:** PostgreSQL
+---
 
-## URLs
+## Este repositorio (GitHub público)
 
-| Entorno | Frontend | API |
-|---------|----------|-----|
-| **Local** | http://localhost:5507 | http://localhost:3007/api |
-| **GitHub Pages** | https://edwardroag.github.io/mr_luigi/ | Requiere hosting aparte |
+Contiene **solo lo necesario para la vitrina**:
 
-## Inicio rápido
+| Incluido | No incluido (desarrollo local privado) |
+|----------|----------------------------------------|
+| `frontend/` — Angular vitrina | `backend/` — API Node.js |
+| `frontend/public/assets/` — logos | `database/` — PostgreSQL |
+| Workflows GitHub Actions | `docker/` — stack completo |
+| Script deploy vitrina | Credenciales, `.env` |
+
+> El backend, POS y panel admin se desarrollan **en local** y no se suben a este repo.
+
+---
+
+## Despliegue automático
+
+Cada push a `main` ejecuta **Deploy vitrina (Pages)**:
+
+1. Build Angular (`npm run build:github`)
+2. Publica en GitHub Pages
+3. URL en **Actions → Summary → View deployment**
+
+Guía: [docs/DEPLOY-VITRINA.md](docs/DEPLOY-VITRINA.md)
+
+---
+
+## Desarrollo local (equipo interno)
+
+El monorepo completo (backend + frontend + BD) vive **solo en la máquina del desarrollador**:
 
 ```powershell
 npm run install:all
-
-# Backend: copiar backend/.env.example → backend/.env y ajustar DB_PASSWORD
-# PostgreSQL: copiar .env.postgres.local.example → .env.postgres.local (contraseña superusuario)
 powershell -File database/setup-local.ps1
-
 npm run seed
 npm run dev
 ```
 
-## Comandos útiles
+- Frontend: http://localhost:5507  
+- API: http://localhost:3007/api  
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Backend + frontend en paralelo (desde la raíz) |
-| `npm run dev:backend` | Solo API (puerto 3007) |
-| `npm run dev:frontend` | Solo Angular (puerto 5507) |
-| `npm run seed` | Datos iniciales (admin, categorías, productos demo) |
-| `npm run sync:assets` | Copia imágenes desde `../luigis_gaming` |
-| `npm run docker:rebuild` | Stack completo con Docker |
-| `npm run build:prod` | Build de producción (hosting privado) |
+Documentación interna en `docs/` (no se sube a GitHub).
 
-Desde `frontend/` también puedes usar `npm run dev` (equivale a `start:local`).
+---
 
-## Documentación
+## Comandos deploy vitrina
 
-- [Instalación local](docs/INSTALACION.md)
-- [Despliegue y GitHub Pages](docs/DESPLIEGUE.md)
-- [Contexto de migración](docs/CONTEXTO_MIGRACION.md)
-- [Trazabilidad](docs/TRAZABILIDAD.md)
-- [Roles y permisos](docs/ROLES.md)
-- [Historial de usuario](historial-usuario.md)
+```powershell
+node scripts/client-vitrina-deploy/detect-and-deploy.js --detect
+node scripts/client-vitrina-deploy/detect-and-deploy.js --untrack-private
+```
 
-## Proyectos de referencia
-
-| Proyecto | Uso |
-|----------|-----|
-| `../CoreX` | Backend, roles, módulos POS |
-| `../luigis_gaming` | Identidad visual y assets |
-
-## Entornos Angular
-
-| Archivo | Uso |
-|---------|-----|
-| `environment.local.ts` | Desarrollo local |
-| `environment.docker.ts` | Docker / LAN |
-| `environment.github.ts` | GitHub Pages (`baseHref: /mr_luigi/`) |
-| `environment.prod.ts` | Hosting privado con dominio propio |
-
-## Credenciales seed (local)
-
-| Rol | Email | Contraseña |
-|-----|-------|------------|
-| Admin | admin@mrluigi.local | MrLuigi2026Admin |
+Ver [scripts/client-vitrina-deploy/README.md](scripts/client-vitrina-deploy/README.md).

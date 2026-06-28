@@ -31,6 +31,7 @@
  *      node scripts/client-vitrina-deploy/detect-and-deploy.js --prepare-local
  *      node scripts/client-vitrina-deploy/detect-and-deploy.js --init-workflow --force
  *      node scripts/client-vitrina-deploy/detect-and-deploy.js --init-ci --force
+ *      node scripts/client-vitrina-deploy/detect-and-deploy.js --untrack-private
  *
  * 4) GIT — asegurar que la vitrina SÍ está en el repo y el backend NO:
  *      - Subir: carpeta vitrina, scripts/client-vitrina-deploy/, .github/workflows/
@@ -54,6 +55,7 @@
  *   --prepare-local    Copia vitrina filtrada a ./deploy-vitrina (prueba local)
  *   --init-workflow    Crea .github/workflows/deploy-vitrina.yml
  *   --init-ci          Crea .github/workflows/ci.yml (smoke test, no publica)
+ *   --untrack-private  Quita backend/código privado del índice git (queda solo local)
  *   --force            Sobrescribe workflow existente
  *   --root=RUTA        Raíz del proyecto (default: directorio actual)
  *   --out=CARPETA      Salida de --prepare-local (default: deploy-vitrina)
@@ -93,6 +95,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { execSync } from 'child_process'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -188,7 +191,30 @@ const PROJECT_CONFIG = {
   ciCheckDeployScript: true,
 
   /** Carpeta local de prueba (--prepare-local) */
-  defaultOutDir: 'deploy-vitrina'
+  defaultOutDir: 'deploy-vitrina',
+
+  /**
+   * Rutas que NO deben estar en el repo público de GitHub.
+   * --untrack-private las saca del índice git (archivos siguen en disco local).
+   */
+  privateGitPaths: [
+    'backend',
+    'database',
+    'docker',
+    'docs/INSTALACION.md',
+    'docs/DESPLIEGUE.md',
+    'docs/CONTEXTO_MIGRACION.md',
+    'docs/TRAZABILIDAD.md',
+    'docs/AGENTE_MIGRACION.md',
+    'docs/ROLES.md',
+    'historial-usuario.md',
+    'scripts/docker-rebuild.ps1',
+    'scripts/build-prod.ps1',
+    'scripts/sync-assets.ps1',
+    '.env.postgres.local.example',
+    'package.json',
+    'package-lock.json'
+  ]
 }
 
 // ======================================================
@@ -206,6 +232,7 @@ function parseArgs(argv) {
     initWorkflow: argv.includes('--init-workflow'),
     initCi: argv.includes('--init-ci'),
     prepareLocal: argv.includes('--prepare-local'),
+    untrackPrivate: argv.includes('--untrack-private'),
     force: argv.includes('--force'),
     root: path.resolve(
       argv.find((a) => a.startsWith('--root='))?.split('=').slice(1).join('=') ||
@@ -492,6 +519,57 @@ ${buildCiBuildSteps()}      - name: Verificar estructura mínima
 `
 }
 
+function appendGitignore(root, paths) {
+  const gitignorePath = path.join(root, '.gitignore')
+  const existing = exists(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf8') : ''
+  const blockHeader = '\n# --- Código privado (solo local, no subir a GitHub) ---\n'
+  let block = blockHeader
+  for (const rel of paths) {
+    const line = `${rel.replace(/\\/g, '/')}\n`
+    if (!existing.includes(line.trim())) block += line
+  }
+  if (block.trim() !== blockHeader.trim()) {
+    fs.writeFileSync(gitignorePath, existing.replace(/\s*$/, '') + block, 'utf8')
+    console.log(`✅ .gitignore actualizado (${paths.length} entradas privadas)`)
+  }
+}
+
+function untrackPrivateFromGit(root) {
+  const paths = PROJECT_CONFIG.privateGitPaths || []
+  if (!paths.length) {
+    console.error('❌ privateGitPaths vacío en PROJECT_CONFIG')
+    process.exit(1)
+  }
+  appendGitignore(root, paths)
+  let removed = 0
+  for (const rel of paths) {
+    const full = path.join(root, rel)
+    if (!exists(full)) {
+      console.log(`⏭️  No existe localmente (solo gitignore): ${rel}`)
+      continue
+    }
+    try {
+      execSync(`git rm -r --cached --ignore-unmatch "${rel.replace(/\\/g, '/')}"`, {
+        cwd: root,
+        stdio: 'pipe'
+      })
+      console.log(`🗑️  Sacado del índice git: ${rel}`)
+      removed++
+    } catch (e) {
+      const msg = e.stderr?.toString() || e.message
+      if (msg.includes('did not match any files')) {
+        console.log(`⏭️  No estaba en git: ${rel}`)
+      } else {
+        console.warn(`⚠️  ${rel}: ${msg.trim()}`)
+      }
+    }
+  }
+  console.log('')
+  console.log(`✅ Listo. ${removed} ruta(s) sacadas del índice git.`)
+  console.log('   Los archivos siguen en tu disco local.')
+  console.log('   Siguiente: git commit -m "chore: repo público solo vitrina" && git push')
+}
+
 function initWorkflow(root, profile, force) {
   const workflowPath = path.join(root, WORKFLOW_REL)
   if (exists(workflowPath) && !force) {
@@ -537,6 +615,7 @@ function printDetect(root, profile) {
   console.log(`  node ${SCRIPT_REL} --prepare-local`)
   console.log(`  node ${SCRIPT_REL} --init-workflow --force`)
   console.log(`  node ${SCRIPT_REL} --init-ci --force`)
+  console.log(`  node ${SCRIPT_REL} --untrack-private`)
   console.log('')
 }
 
@@ -548,6 +627,7 @@ Uso: node ${SCRIPT_REL} [opciones]
   --prepare-local    Copia vitrina filtrada a ./${PROJECT_CONFIG.defaultOutDir}
   --init-workflow    Genera ${WORKFLOW_REL} (publica Pages + URL)
   --init-ci          Genera ${CI_WORKFLOW_REL} (smoke test, no publica)
+  --untrack-private  Quita backend/código privado del índice git
   --force            Sobrescribe workflow existente
   --root=RUTA        Raíz del proyecto
   --out=CARPETA      Salida local (default: ${PROJECT_CONFIG.defaultOutDir})
@@ -559,7 +639,7 @@ Guía completa en la cabecera de este archivo y en docs/DEPLOY-VITRINA.md
 function main() {
   const args = parseArgs(process.argv.slice(2))
 
-  if (!args.detect && !args.initWorkflow && !args.prepareLocal && !args.initCi) {
+  if (!args.detect && !args.initWorkflow && !args.prepareLocal && !args.initCi && !args.untrackPrivate) {
     printHelp()
     process.exit(0)
   }
@@ -569,6 +649,7 @@ function main() {
   if (args.prepareLocal) prepareLocal(args.root, profile, args.outDir)
   if (args.initWorkflow) initWorkflow(args.root, profile, args.force)
   if (args.initCi) initCiWorkflow(args.root, profile, args.force)
+  if (args.untrackPrivate) untrackPrivateFromGit(args.root)
 }
 
 main()
