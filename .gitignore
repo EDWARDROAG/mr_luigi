@@ -1,5 +1,6 @@
 node_modules/
 dist/
+deploy-vitrina/
 .env
 .env.postgres.local
 backend/.env

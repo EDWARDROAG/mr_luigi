@@ -23,14 +23,15 @@ Migrar el sistema completo (backend + panel interno + vitrina) al stack **Angula
 
 ---
 
-## Puertos
+## Puertos y URLs
 
-| Servicio | Puerto | Entorno |
-|----------|--------|---------|
-| API Backend | **3007** | local, docker, prod |
-| Frontend Angular | **5507** | local, docker |
+| Servicio | Puerto / URL | Entorno |
+|----------|--------------|---------|
+| API Backend | **3007** → http://localhost:3007/api | local, docker, prod |
+| Frontend Angular | **5507** → http://localhost:5507 | local, docker |
 | PostgreSQL local | 5432 | desarrollo nativo |
 | PostgreSQL Docker | 5433→5432 | docker-compose |
+| GitHub Pages | https://edwardroag.github.io/mr_luigi/ | demo frontend estático |
 
 ---
 
@@ -71,7 +72,9 @@ Migrar el sistema completo (backend + panel interno + vitrina) al stack **Angula
 
 **Tipografías:** Orbitron (títulos), Inter (cuerpo)
 
-**Assets:** Reutilizar desde `../luigis_gaming/apps/web/public/assets/` vía script `scripts/sync-assets.ps1`
+**Assets:** Reutilizar desde `../luigis_gaming/` vía `npm run sync:assets` → destino `frontend/public/assets/`. Deben commitearse para que aparezcan en GitHub Pages.
+
+**Rutas de assets:** `AssetService` usa `APP_BASE_HREF` para resolver `/assets/...` en local y `/mr_luigi/assets/...` en GitHub Pages.
 
 ---
 
@@ -81,14 +84,16 @@ Migrar el sistema completo (backend + panel interno + vitrina) al stack **Angula
 |---------|-----|
 | `environment.local.ts` | Desarrollo local (`localhost:3007`) |
 | `environment.docker.ts` | Docker/LAN (API relativa `/api`) |
-| `environment.prod.ts` | Producción (hosting privado) |
+| `environment.github.ts` | GitHub Pages (`baseHref: /mr_luigi/`) |
+| `environment.prod.ts` | Producción (hosting privado con dominio) |
 
 ---
 
 ## Flujo de despliegue
 
 ```
-Local (npm run dev) → Docker (scripts/docker-rebuild.ps1) → GitHub push → Hosting automático
+Local (npm run dev) → Docker (docker-rebuild.ps1) → GitHub push → GitHub Pages (frontend)
+                                                      └→ Hosting privado (API + prod completa)
 ```
 
 Ver `docs/DESPLIEGUE.md` y `scripts/` para comandos.

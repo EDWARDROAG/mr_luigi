@@ -17,7 +17,7 @@ Este documento define el rol del **agente especializado en fronts y migración d
 | Backend | CoreX | Copiar/adaptar; no reinventar |
 | Visual | Luigi's Gaming | Nunca copiar UI de CoreX |
 | Puertos | Mr. Luigi | 3007 API / 5507 frontend |
-| Entornos | 3 capas | local → docker → prod |
+| Entornos | 4 capas | local → docker → github-pages → prod |
 
 ## Checklist por módulo
 
@@ -38,4 +38,7 @@ cd mr_luigi && npm run install:all && npm run dev
 
 # Sincronizar assets Luigi
 npm run sync:assets
+
+# Build GitHub Pages (local)
+cd frontend && npm run build:github
 ```

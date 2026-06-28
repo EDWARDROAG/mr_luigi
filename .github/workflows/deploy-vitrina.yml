@@ -1,0 +1,83 @@
+# Generado por scripts/client-vitrina-deploy/detect-and-deploy.js — regenerar con --init-workflow --force
+# Publica frontend/dist/frontend/browser/ en la RAÍZ de GitHub Pages (index.html en /).
+# Requisito: Settings → Pages → Source: GitHub Actions
+# URL y "View deployment" aparecen en este workflow (NO en CI vitrina).
+
+name: Deploy vitrina (Pages)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-vitrina
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build GitHub Pages
+        working-directory: frontend
+        run: npm run build:github
+
+      - name: SPA fallback (404 → index.html)
+        run: cp frontend/dist/frontend/browser/index.html frontend/dist/frontend/browser/404.html
+
+      - name: Verificar vitrina (index.html en raíz del artefacto)
+        run: |
+          test -f frontend/dist/frontend/browser/index.html || (echo "❌ Falta frontend/dist/frontend/browser/index.html" && exit 1)
+          test -f frontend/dist/frontend/browser/assets/img/logo.png || (echo "❌ Falta frontend/dist/frontend/browser/assets/img/logo.png" && exit 1)
+          test -f frontend/dist/frontend/browser/404.html || echo "⚠️ Recomendado: frontend/dist/frontend/browser/404.html"
+          test -f frontend/dist/frontend/browser/.nojekyll || echo "⚠️ Recomendado: frontend/dist/frontend/browser/.nojekyll"
+          echo "✅ Vitrina OK — se publicará en la raíz de Pages (no README del repo)"
+          ls -la frontend/dist/frontend/browser/ | head -20
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artefacto (contenido de frontend/dist/frontend/browser → raíz del sitio)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist/frontend/browser
+
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: URL del sitio publicado
+        run: |
+          URL="${{ steps.deployment.outputs.page_url }}"
+          echo "=============================================="
+          echo "URL publicada: $URL"
+          echo "=============================================="
+          echo "## ✅ Sitio publicado en GitHub Pages" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### [$URL]($URL)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Debe cargar la **vitrina** (menú, catálogo), no el README del repositorio." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "En la lista de Actions, este run muestra **View deployment** junto al job." >> "$GITHUB_STEP_SUMMARY"
